@@ -52,23 +52,23 @@ docker pull your_dockerhub_username/sylva3d:latest
 
 #### Running the Application
 
-1. **Set the DISPLAY environment variable** (for Windows users using WSL):
+1. **Set the DISPLAY environment variable** (for Windows users using WSL): 
 
-   ```bash
+```bash
+export DISPLAY=$(grep -oP '(?<=nameserver\s)\S+' /etc/resolv.conf):0
 
-   export DISPLAY=$(grep -oP '(?<=nameserver\s)\S+' /etc/resolv.conf):0
+xhost +
+```
 
-   xhost +
-
-   ```
+  
 
 2. **Run the Docker container**:
 
-   ```bash
+```bash
+docker run --gpus all -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -it amiche/sylva3d
+```
 
-   docker run --gpus all -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -it amiche/sylva3d
 
-   ```
 
 This command runs the Sylva3D application inside a Docker container with GPU support and connects to your local X server to display the GUI.
 
@@ -89,30 +89,30 @@ Once the application is running, the GUI will launch and you can start using Syl
 If you want to build the Docker image from source, follow these steps:
 
 1. **Clone the Repository**:
+   
+   ```bash
+    git clone https://github.com/Amiche02/Sylva3dGUI.git
+   
+    cd Sylva3dApp
+   ```
 
-   ```bash
 
-   git clone https://github.com/Amiche02/Sylva3dGUI.git
-
-   cd Sylva3dApp
-
-   ```
 
 2. **Build the Docker Image**:
 
-   ```bash
+```bash
+ docker build -t sylva3d .
+```
 
-   docker build -t sylva3d .
-
-   ```
+  
 
 3. **Run the Docker Container**:
 
-   ```bash
+```bash
+ docker run --gpus all -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -it sylva3d
+```
 
-   docker run --gpus all -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -it sylva3d
 
-   ```
 
 #### Troubleshooting
 
