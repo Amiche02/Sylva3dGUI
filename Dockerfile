@@ -1,5 +1,5 @@
 ARG UBUNTU_VERSION=22.04
-ARG NVIDIA_CUDA_VERSION=12.3.1
+ARG NVIDIA_CUDA_VERSION=11.8.0
 
 FROM nvidia/cuda:${NVIDIA_CUDA_VERSION}-devel-ubuntu${UBUNTU_VERSION} as builder
 
@@ -8,6 +8,7 @@ ARG CUDA_ARCHITECTURES="60;61;62;70;72;75;80;86"
 ENV QT_XCB_GL_INTEGRATION=xcb_egl
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Install dependencies and COLMAP
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         git \
@@ -40,18 +41,21 @@ RUN git clone https://github.com/colmap/colmap.git && \
     cd build && \
     cmake .. -GNinja -DCMAKE_CUDA_ARCHITECTURES=${CUDA_ARCHITECTURES} \
         -DCMAKE_INSTALL_PREFIX=/colmap_installed && \
-    ninja install -j4
+    ninja install -j4 && \
+    rm -rf /colmap/build && \
+    rm -rf /colmap/.git
 
 FROM nvidia/cuda:${NVIDIA_CUDA_VERSION}-devel-ubuntu${UBUNTU_VERSION}
 
 ARG MASTER=0
-ARG USER_ID
-ARG GROUP_ID
+ARG USER_ID=1000
+ARG GROUP_ID=1000
 ARG CUDA=0
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Europe/Paris
 
+# Install runtime dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 \
     python3-pip \
@@ -76,29 +80,30 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+# Copy COLMAP installation from builder stage
 COPY --from=builder /colmap_installed/ /usr/local/
 
 WORKDIR /workspace
 
-COPY build_openmvs.sh requirements.txt /workspace/
+# Copy application files and build scripts
+COPY requirements.txt /workspace/requirements.txt
+COPY build_openmvs.sh /workspace/build_openmvs.sh
 
-RUN chmod +x /workspace/build_openmvs.sh
+# Install Python dependencies
+RUN pip3 install --no-cache-dir -r /workspace/requirements.txt && \
+    rm /workspace/requirements.txt
 
-RUN /workspace/build_openmvs.sh --cuda $CUDA --user_id $USER_ID --group_id $GROUP_ID --master $MASTER && \
+# Build and install OpenMVS
+RUN chmod +x /workspace/build_openmvs.sh && \
+    /workspace/build_openmvs.sh --cuda $CUDA --user_id $USER_ID --group_id $GROUP_ID --master $MASTER && \
     rm /workspace/build_openmvs.sh
 
-ENV PATH /usr/local/bin/OpenMVS:$PATH
+# Add OpenMVS binaries to PATH
+ENV PATH=/usr/local/bin/OpenMVS:$PATH
 
-RUN pip3 install -r /workspace/requirements.txt
+# Copy remaining application files and set executable permissions
+COPY ./tkinter /workspace/tkinter
+RUN chmod +x /workspace/tkinter/colmap_openmvs.sh /workspace/tkinter/colmap_demo.sh
 
-COPY . /workspace
-
-RUN if [ -n "$USER_ID" ] && [ -n "$GROUP_ID" ]; then \
-        groupadd -g $GROUP_ID usergroup && \
-        useradd -m -u $USER_ID -g $GROUP_ID -s /bin/bash user && \
-        chown -R $USER_ID:$GROUP_ID /workspace; \
-    fi
-
-USER $USER_ID
-
+# Default command
 CMD ["python3", "/workspace/tkinter/app.py"]
