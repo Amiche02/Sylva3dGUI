@@ -1,0 +1,15 @@
+--extra-index-url https://download.pytorch.org/whl/cu118
+torch==2.3.0 
+torchvision==0.18.0
+pytorch-lightning==2.2.3
+kornia==0.6.12
+opencv-python
+jupyter
+test-tube
+pillow
+rembg
+typing
+gitpython
+huggingface_hub
+safetensors
+
