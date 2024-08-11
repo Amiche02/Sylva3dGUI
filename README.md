@@ -1,18 +1,11 @@
-<<<<<<< HEAD
-=======
----
-
->>>>>>> 38d1cef8082c762d779edea5e0dafc164838cb71
 # Sylva3D: GUI for Photogrammetry
 
 ## Overview
 
 Sylva3D is a Dockerized application that provides a graphical user interface (GUI) for photogrammetry tasks using COLMAP and OpenMVS. Photogrammetry is the process of reconstructing 3D models from a series of photographs, and Sylva3D simplifies this process, leveraging CUDA for GPU acceleration to ensure efficient processing.
 
-<<<<<<< HEAD
 ![Image 1](ressources/1.png) ![Image 2](ressources/2.png) ![Image 3](ressources/3.png) ![Image 4](ressources/4.png) ![Image 5](ressources/5.png)
-=======
->>>>>>> 38d1cef8082c762d779edea5e0dafc164838cb71
+
 ## Features
 
 - **Photogrammetry Pipeline**: Integrates COLMAP and OpenMVS to create detailed 3D models from photographs.
