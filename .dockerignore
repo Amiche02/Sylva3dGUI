@@ -1,0 +1,13 @@
+# Ignore .git directory
+.git/
+
+# Ignore Dockerfile and related files
+docker-compose.yml
+
+# Ignore non-essential files
+info.md
+Structure.py
+README.md
+
+# Ignore any other unnecessary files or directories
+*.md
